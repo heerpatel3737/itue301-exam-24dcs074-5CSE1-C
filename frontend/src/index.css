@@ -1,0 +1,327 @@
+/* ==========================================
+   LIBRANOVA - CLASSICAL ACADEMIA DESIGN SYSTEM
+   Theme: Dark Mahogany, Parchment & Brass Gold
+   ========================================== */
+
+:root {
+  --bg-mahogany-dark: #120907;
+  --bg-mahogany-main: #1c0f0a;
+  --bg-mahogany-card: #281710;
+  
+  --parchment-light: #f7f1e3;
+  --parchment-base: #ece2c8;
+  --parchment-muted: #d9cbb0;
+  --parchment-dark: #8c7657;
+
+  --gold-brass: #d4af37;
+  --gold-light: #f3e2a9;
+  --gold-dark: #9e7b23;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+
+  --crimson-accent: #800020;
+  --crimson-bright: #a81c38;
+  --crimson-dark: #4d0513;
+
+  --emerald-available: #1b4d3e;
+  --emerald-bright: #2d8a6e;
+
+  --font-heading: 'Cinzel', serif;
+  --font-subheading: 'Cormorant Garamond', serif;
+  --font-body: 'Crimson Pro', serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-mahogany-dark);
+  color: var(--parchment-base);
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 50% 30%, rgba(38, 20, 14, 0.8) 0%, rgba(18, 9, 7, 0.98) 100%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 2px, transparent 2px, transparent 4px);
+  background-attachment: fixed;
+}
+
+/* Vignette border effect */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+  position: relative;
+}
+
+/* Top Roman Numeral Header Banner */
+.volume-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  letter-spacing: 3px;
+  font-size: 0.85rem;
+  color: var(--gold-brass);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--gold-brass);
+  padding-bottom: 2px;
+  margin-bottom: 12px;
+}
+
+/* Ornate Line Dividers */
+.ornate-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  color: var(--gold-brass);
+  font-family: var(--font-heading);
+}
+
+.ornate-divider::before,
+.ornate-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px dashed var(--gold-dark);
+  margin: 0 15px;
+  opacity: 0.5;
+}
+
+/* Arch top container style */
+.arch-card {
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(180deg, var(--bg-mahogany-card) 0%, var(--bg-mahogany-main) 100%);
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.arch-card:hover {
+  border-color: var(--gold-brass);
+  box-shadow: 0 15px 35px var(--gold-glow);
+  transform: translateY(-4px);
+}
+
+/* Brass Corner Flourish Decorations */
+.arch-card::before {
+  content: "♦";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  color: var(--gold-brass);
+  font-size: 0.75rem;
+}
+
+.arch-card::after {
+  content: "♦";
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: var(--gold-brass);
+  font-size: 0.75rem;
+}
+
+/* Classical Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--parchment-light);
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: 2.8rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+h2 {
+  font-size: 2rem;
+  color: var(--gold-brass);
+}
+
+/* Classical Wax Seal Accent */
+.wax-seal {
+  width: 48px;
+  height: 48px;
+  background: radial-gradient(circle, var(--crimson-bright) 0%, var(--crimson-dark) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(255,255,255,0.3);
+  border: 2px solid var(--crimson-accent);
+}
+
+/* Buttons */
+.btn-classical {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  padding: 12px 26px;
+  background: linear-gradient(180deg, #991b1b 0%, #450a0a 100%);
+  color: var(--parchment-light);
+  border: 1px solid var(--gold-brass);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.btn-classical:hover {
+  background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
+  color: #ffffff;
+  border-color: var(--gold-light);
+  box-shadow: 0 0 15px var(--gold-glow);
+  transform: translateY(-2px);
+}
+
+.btn-classical-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  padding: 12px 26px;
+  background: rgba(28, 15, 10, 0.7);
+  color: var(--gold-brass);
+  border: 1px solid var(--gold-brass);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.btn-classical-outline:hover {
+  background: var(--gold-brass);
+  color: var(--bg-mahogany-dark);
+  box-shadow: 0 0 15px var(--gold-glow);
+  transform: translateY(-2px);
+}
+
+/* Status Badges */
+.badge-available {
+  background: rgba(27, 77, 62, 0.7);
+  color: #6ee7b7;
+  border: 1px solid #10b981;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-family: var(--font-subheading);
+  font-weight: 600;
+}
+
+.badge-unavailable {
+  background: rgba(128, 0, 32, 0.7);
+  color: #fca5a5;
+  border: 1px solid #ef4444;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-family: var(--font-subheading);
+  font-weight: 600;
+}
+
+/* Modal Glass Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 5, 3, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: var(--bg-mahogany-card);
+  border: 2px solid var(--gold-brass);
+  border-radius: 12px;
+  max-width: 550px;
+  width: 100%;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 30px var(--gold-glow);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: var(--gold-brass);
+  letter-spacing: 1px;
+}
+
+.form-input {
+  background: rgba(18, 9, 7, 0.8);
+  border: 1px solid var(--parchment-dark);
+  color: var(--parchment-light);
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  transition: all 0.25s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--gold-brass);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+/* Live Parchment Preview Card */
+.parchment-preview {
+  background: var(--parchment-base);
+  color: #2b1810;
+  padding: 25px;
+  border-radius: 6px;
+  border: 2px dashed var(--gold-dark);
+  box-shadow: inset 0 0 20px rgba(140, 118, 87, 0.3), 0 10px 25px rgba(0,0,0,0.5);
+  position: relative;
+  font-family: var(--font-subheading);
+}
+
+.parchment-preview h3 {
+  color: #4a0e17;
+  font-family: var(--font-heading);
+  border-bottom: 1px solid #8c7657;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+/* Responsive grid */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
