@@ -11,7 +11,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 def create_report():
     pdf_filename = "24dcs074_SetB_Report.pdf"
     
-    # Custom color palette matching classical theme
+    # Theme color palette
     PRIMARY_MAHOGANY = colors.HexColor("#1c0f0a")
     ACCENT_GOLD = colors.HexColor("#9e7b23")
     ACCENT_CRIMSON = colors.HexColor("#800020")
@@ -22,21 +22,21 @@ def create_report():
     doc = SimpleDocTemplate(
         pdf_filename,
         pagesize=letter,
-        leftMargin=40,
-        rightMargin=40,
-        topMargin=40,
-        bottomMargin=40
+        leftMargin=36,
+        rightMargin=36,
+        topMargin=36,
+        bottomMargin=36
     )
 
     styles = getSampleStyleSheet()
     
-    # Define custom paragraph styles
+    # Custom Paragraph Styles
     title_style = ParagraphStyle(
         'CoverTitle',
         parent=styles['Title'],
         fontName='Helvetica-Bold',
-        fontSize=30,
-        leading=36,
+        fontSize=28,
+        leading=34,
         textColor=PRIMARY_MAHOGANY,
         alignment=TA_CENTER
     )
@@ -45,8 +45,8 @@ def create_report():
         'CoverSubtitle',
         parent=styles['Normal'],
         fontName='Helvetica-Oblique',
-        fontSize=14,
-        leading=18,
+        fontSize=13,
+        leading=16,
         textColor=ACCENT_GOLD,
         alignment=TA_CENTER
     )
@@ -65,21 +65,10 @@ def create_report():
         'Heading1_Custom',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=16,
-        leading=20,
+        fontSize=15,
+        leading=18,
         textColor=PRIMARY_MAHOGANY,
-        spaceBefore=14,
-        spaceAfter=8
-    )
-
-    h2_style = ParagraphStyle(
-        'Heading2_Custom',
-        parent=styles['Heading2'],
-        fontName='Helvetica-Bold',
-        fontSize=12,
-        leading=16,
-        textColor=ACCENT_CRIMSON,
-        spaceBefore=10,
+        spaceBefore=12,
         spaceAfter=6
     )
 
@@ -87,8 +76,8 @@ def create_report():
         'Body_Custom',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=10,
-        leading=14,
+        fontSize=9.5,
+        leading=13.5,
         textColor=TEXT_DARK,
         alignment=TA_JUSTIFY,
         spaceAfter=6
@@ -98,171 +87,89 @@ def create_report():
         'Caption_Custom',
         parent=styles['Normal'],
         fontName='Helvetica-BoldOblique',
-        fontSize=10,
-        leading=13,
+        fontSize=9.5,
+        leading=12.5,
         textColor=ACCENT_CRIMSON,
         alignment=TA_CENTER,
-        spaceBefore=6,
+        spaceBefore=5,
         spaceAfter=12
+    )
+
+    box_text_style = ParagraphStyle(
+        'BoxText',
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        textColor=colors.HexColor("#7a7a7a")
     )
 
     story = []
 
     # =========================================================
-    # 1. TITLE PAGE
+    # PAGE 1: COVER PAGE & PROJECT OVERVIEW
     # =========================================================
-    story.append(Spacer(1, 40))
-    story.append(Paragraph("PRACTICAL EXAMINATION REPORT", subtitle_style))
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("LIBRANOVA", title_style))
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("PRACTICAL EXAMINATION LABORATORY REPORT", subtitle_style))
     story.append(Spacer(1, 8))
+    story.append(Paragraph("LIBRANOVA", title_style))
+    story.append(Spacer(1, 6))
     story.append(Paragraph('"Your Books. Your Knowledge. Your Library."', subtitle_style))
-    story.append(Spacer(1, 15))
-    story.append(HRFlowable(width="80%", thickness=2, color=BORDER_GOLD, spaceAfter=20, spaceBefore=10))
+    story.append(Spacer(1, 10))
+    story.append(HRFlowable(width="85%", thickness=2, color=BORDER_GOLD, spaceAfter=15, spaceBefore=8))
     
     meta_text = """
-    <b>Roll Number:</b> 24DCS074<br/>
-    <b>Batch:</b> 5CSE1-C<br/>
-    <b>Exam Set:</b> Set B<br/>
-    <b>Course Code:</b> ITUE301<br/>
-    <b>Repository:</b> <code>itue301-exam-24dcs074-5CSE1-C</code><br/>
-    <b>Date:</b> August 20, 2026
+    <b>Candidate Student Roll No:</b> 24DCS074 &nbsp;|&nbsp; <b>Batch:</b> 5CSE1-C &nbsp;|&nbsp; <b>Exam Set:</b> Set B<br/>
+    <b>Course Title & Code:</b> ITUE301 Web Application Development<br/>
+    <b>Repository Name:</b> <code>itue301-exam-24dcs074-5CSE1-C</code> &nbsp;|&nbsp; <b>Date:</b> August 20, 2026
     """
     story.append(Paragraph(meta_text, meta_style))
-    story.append(Spacer(1, 40))
-
-    # Cover Summary Card Table
-    summary_data = [
-        [Paragraph("<b>Component</b>", body_style), Paragraph("<b>Technology / Implementation</b>", body_style)],
-        [Paragraph("Frontend Framework", body_style), Paragraph("React 18 + React Router v6 + Vanilla CSS", body_style)],
-        [Paragraph("Backend REST API", body_style), Paragraph("Node.js + Express.js + Custom Middleware", body_style)],
-        [Paragraph("Database & ODM", body_style), Paragraph("MongoDB + Mongoose Schema Validation", body_style)],
-        [Paragraph("Theme & Aesthetics", body_style), Paragraph("Classical Academia (Mahogany, Parchment, Brass Gold)", body_style)]
-    ]
-    summary_table = Table(summary_data, colWidths=[150, 320])
-    summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), BG_PARCHMENT),
-        ('TEXTCOLOR', (0,0), (-1,0), PRIMARY_MAHOGANY),
-        ('GRID', (0,0), (-1,-1), 1, BORDER_GOLD),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('PADDING', (0,0), (-1,-1), 6),
-    ]))
-    story.append(summary_table)
-    story.append(PageBreak())
-
-    # =========================================================
-    # 2. PROJECT OVERVIEW
-    # =========================================================
-    story.append(Paragraph("2. Project Overview", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
-    overview_p = """
-    <b>LIBRANOVA</b> is a complete, full-stack Library Book Management System built from scratch for the Set B Practical Examination.
-    The application embodies a prestigious classical Academia aesthetic inspired by historical scholarly libraries (featuring dark mahogany tones, parchment elements, gold borders, and Roman volume headers).
-    The system allows users to seamlessly explore book archives, view availability indicators, trigger quick book preview modals, filter available volumes, and submit controlled borrowing requisitions with real-time feedback.
-    """
-    story.append(Paragraph(overview_p, body_style))
-    story.append(Spacer(1, 10))
-
-    # =========================================================
-    # 3. TECHNOLOGY STACK
-    # =========================================================
-    story.append(Paragraph("3. Technology Stack", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
-    tech_data = [
-        [Paragraph("<b>Layer</b>", body_style), Paragraph("<b>Technology</b>", body_style), Paragraph("<b>Role / Function</b>", body_style)],
-        [Paragraph("Frontend", body_style), Paragraph("React 18 & React Router v6", body_style), Paragraph("Single Page Application routing, component state, & dynamic rendering", body_style)],
-        [Paragraph("Styling", body_style), Paragraph("Vanilla CSS + Google Fonts", body_style), Paragraph("Academia theme design system (Cinzel, Cormorant Garamond)", body_style)],
-        [Paragraph("Backend", body_style), Paragraph("Node.js & Express.js", body_style), Paragraph("RESTful API routes, logging, and global error handling", body_style)],
-        [Paragraph("Database", body_style), Paragraph("MongoDB & Mongoose", body_style), Paragraph("NoSQL storage, schemas, references, and validation constraints", body_style)],
-        [Paragraph("HTTP Client", body_style), Paragraph("Native Fetch API", body_style), Paragraph("Asynchronous API requests with loading/error handling", body_style)]
-    ]
-    tech_table = Table(tech_data, colWidths=[80, 160, 230])
-    tech_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), BG_PARCHMENT),
-        ('GRID', (0,0), (-1,-1), 1, BORDER_GOLD),
-        ('PADDING', (0,0), (-1,-1), 5),
-    ]))
-    story.append(tech_table)
     story.append(Spacer(1, 15))
 
-    # =========================================================
-    # 4. TASK 1–5 IMPLEMENTATION EXPLANATION
-    # =========================================================
-    story.append(Paragraph("4. Task 1–5 Implementation Details", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
+    story.append(Paragraph("1. Project Overview & Architecture", h1_style))
+    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=8, spaceBefore=2))
+    overview_text = """
+    <b>LIBRANOVA</b> is a complete, full-stack Library Book Management System developed specifically for the Set B Practical Examination.
+    The application features an Academia/Classical aesthetic (dark mahogany palette, parchment card containers, gold border flourishes, and Roman numeral VOLUME section headers).
+    The architecture cleanly separates React component views, client-side routing, Express RESTful API endpoints, and a persistent MongoDB database managed via Mongoose schemas.
+    """
+    story.append(Paragraph(overview_text, body_style))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("2. Detailed Implementation of Tasks 1–5", h1_style))
+    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=8, spaceBefore=2))
     
-    t1 = """<b>Task 1 — React Components:</b> Implemented five core components: <code>HomePage</code>, <code>BooksPage</code>, <code>BorrowPage</code>, <code>BookCard</code>, and <code>Navigation</code>. The <code>BookCard</code> component receives props (<code>title</code>, <code>author</code>, <code>category</code>, <code>available</code>) and displays visually distinct badges for Available (Emerald green badge) vs Not Available (Crimson red badge)."""
+    t1 = "<b>Task 1 — React Components:</b> Developed five modular UI components: <code>Navigation</code> (header bar), <code>BookCard</code> (reusable item display with distinct Emerald 'Available' vs Crimson 'Not Available' badges), <code>HomePage</code> (hero banner), <code>BooksPage</code> (catalog view), and <code>BorrowPage</code> (requisition manager)."
     story.append(Paragraph(t1, body_style))
-    
-    t2 = """<b>Task 2 — Routing & State:</b> Configured client-side routing using React Router v6 (<code>&lt;BrowserRouter&gt;</code>, <code>&lt;Routes&gt;</code>, <code>&lt;Route&gt;</code>) with <code>&lt;Link&gt;</code> elements navigating between <code>/</code>, <code>/books</code>, and <code>/borrow</code> without triggering full browser reloads. Implemented controlled form inputs in <code>BorrowPage</code> (Member Name, Book Title, Borrow Date, Return Date) using <code>useState</code> with a live updating Parchment Summary card."""
+
+    t2 = "<b>Task 2 — Routing & State:</b> Integrated React Router v6 (<code>&lt;BrowserRouter&gt;</code>, <code>&lt;Routes&gt;</code>, <code>&lt;Route&gt;</code>) with <code>&lt;Link&gt;</code> elements navigating between <code>/</code>, <code>/books</code>, and <code>/borrow</code> without page reload. Form inputs on <code>BorrowPage</code> are controlled using React <code>useState</code>, updating a real-time Live Borrowing Summary card as the user types."
     story.append(Paragraph(t2, body_style))
 
-    t3 = """<b>Task 3 — Express REST API & Middleware:</b> Developed Node/Express backend with in-memory API endpoints: <code>GET /api/v1/books</code> (status 200), <code>GET /api/v1/borrowings</code> (status 200), and <code>POST /api/v1/borrowings</code> (status 201). Created global <code>requestLogger</code> middleware logging <code>[METHOD] [PATH] [TIMESTAMP]</code> and global error-handling middleware placed as the last middleware to return structured JSON errors without exposing raw stack traces."""
+    t3 = "<b>Task 3 — Express REST API & Middleware:</b> Configured Node/Express backend APIs: <code>GET /api/v1/books</code> (200 OK), <code>GET /api/v1/borrowings</code> (200 OK), and <code>POST /api/v1/borrowings</code> (201 Created). Added global <code>requestLogger</code> logging <code>[METHOD] [PATH] [TIMESTAMP]</code> and global error-handling middleware returning structured JSON without stack traces."
     story.append(Paragraph(t3, body_style))
 
-    t4 = """<b>Task 4 — React API Consumption:</b> <code>BooksPage</code> consumes the Express API using <code>useEffect()</code> and <code>fetch('http://localhost:5000/api/v1/books')</code>. Maintained <code>data</code>, <code>loading</code>, and <code>error</code> states with dedicated UI components for loading spinners, error retry alerts, and success grid rendering via <code>BookCard</code>."""
+    t4 = "<b>Task 4 — React API Consumption:</b> <code>BooksPage</code> consumes the Express API using <code>useEffect()</code> and native <code>fetch()</code>. Maintained <code>data</code>, <code>loading</code>, and <code>error</code> state hooks with UI feedback for loading indicators, connection retry alerts, and rendered <code>BookCard</code> grids."
     story.append(Paragraph(t4, body_style))
 
-    t5 = """<b>Task 5 — MongoDB & Mongoose Integration:</b> Defined three Mongoose models in <code>models/</code>: <code>Book.js</code> (required title/author/category, unique ISBN, default available true), <code>Member.js</code> (required name/email/dept, unique email), and <code>Borrowing.js</code> (references to Member and Book, borrow/return dates, status enum restricted to <code>['borrowed', 'returned', 'overdue']</code>). Connected via <code>MONGO_URI</code> from <code>.env</code> and demonstrated validation error handling returning 400 Bad Request."""
+    t5 = "<b>Task 5 — MongoDB & Mongoose Integration:</b> Created three Mongoose models (<code>Book.js</code>, <code>Member.js</code>, <code>Borrowing.js</code>) with schema constraints (required fields, unique ISBN/email, status enum). Connected via <code>MONGO_URI</code> from <code>.env</code>. Endpoints query directly from MongoDB, returning structured JSON 400 Bad Request error responses on validation failures."
     story.append(Paragraph(t5, body_style))
-    story.append(Spacer(1, 15))
 
-    # =========================================================
-    # 5. INTERACTIVE UX FEATURE & HOW TO RUN
-    # =========================================================
-    story.append(Paragraph("5. Interactive UX Feature & How to Run", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
-    
-    ux_p = """<b>Quick Book Preview & Available Only Filter:</b> Clicking any <code>BookCard</code> triggers an ornate modal showing title, author, category, availability, and description. An <b>Available Only</b> toggle button allows instant state filtering on fetched API data using <code>useState</code> without extra backend requests."""
-    story.append(Paragraph(ux_p, body_style))
-
-    run_p = """<b>How to Run Application:</b><br/>
-    1. Start Backend: <code>cd backend && npm install && node server.js</code> (Port 5000)<br/>
-    2. Start Frontend: <code>cd frontend && npm install && npm run dev</code> (Port 5173)<br/>
-    3. Access Browser: Open <code>http://localhost:5173</code>
-    """
-    story.append(Paragraph(run_p, body_style))
     story.append(PageBreak())
 
     # =========================================================
-    # 6. VIVA CONCEPTS CHEAT SHEET
+    # PAGE 2: EVIDENCE SECTION — FRONTEND SCREENS 1 & 2
     # =========================================================
-    story.append(Paragraph("6. Viva Key Concepts Reference", h1_style))
+    story.append(Paragraph("3. Implementation Evidence & Screenshots", h1_style))
     story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
-
-    viva_data = [
-        [Paragraph("<b>Concept</b>", body_style), Paragraph("<b>Key Explanation for Viva</b>", body_style)],
-        [Paragraph("Components & Props", body_style), Paragraph("Components are reusable UI functions returning JSX. Props are read-only inputs passed from parent to child components.", body_style)],
-        [Paragraph("React Router & Link", body_style), Paragraph("Enables client-side SPA routing without full page reload. Link updates URL history and renders matched route components.", body_style)],
-        [Paragraph("Controlled Inputs", body_style), Paragraph("Form inputs bound to React state via value and onChange, making React the single source of truth.", body_style)],
-        [Paragraph("useEffect & fetch", body_style), Paragraph("useEffect performs side effects after render (fetching API data on mount). fetch returns Promises for async HTTP calls.", body_style)],
-        [Paragraph("Middleware & Error Handling", body_style), Paragraph("Functions executing in request-response cycle. Error handler (4 args) placed last formats structured JSON error responses.", body_style)],
-        [Paragraph("Mongoose Validation & Enum", body_style), Paragraph("Schemas enforce types and constraints (required, unique, enum). Invalid data triggers ValidationError caught by Express.", body_style)]
-    ]
-    viva_table = Table(viva_data, colWidths=[130, 340])
-    viva_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), BG_PARCHMENT),
-        ('GRID', (0,0), (-1,-1), 1, BORDER_GOLD),
-        ('PADDING', (0,0), (-1,-1), 5),
-    ]))
-    story.append(viva_table)
-    story.append(Spacer(1, 20))
-
-    # =========================================================
-    # 7. EVIDENCE SECTION (3 LARGE WHITE SCREENSHOT PLACEHOLDERS)
-    # =========================================================
-    story.append(Paragraph("7. Implementation Evidence & Screenshots", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=12, spaceBefore=2))
     
-    notice_p = "<i>Note: In accordance with examination guidelines, structured empty placeholder boxes are provided below for inserting evaluation screenshots.</i>"
-    story.append(Paragraph(notice_p, body_style))
-    story.append(Spacer(1, 10))
+    note_p = "<i>Note: Structured white rectangular frames are provided below for pasting evaluation evidence screenshots.</i>"
+    story.append(Paragraph(note_p, body_style))
+    story.append(Spacer(1, 8))
 
-    # Screenshot 1 Box — React Application
-    sc1_content = [
-        [Paragraph("<br/><br/><br/><br/><b>[ SCREENSHOT PLACEHOLDER 1 ]</b><br/><i>React Application UI (HomePage / BooksPage / BorrowPage)</i><br/><br/><br/><br/>", ParagraphStyle('BoxText', alignment=TA_CENTER, fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor("#7a7a7a")))]
-    ]
-    sc1_table = Table(sc1_content, colWidths=[470], rowHeights=[170])
+    # SCREENSHOT 1 PLACEHOLDER — FRONTEND HOME PAGE
+    sc1_content = [[
+        Paragraph("<br/><br/><br/><br/><b>[ FRONTEND SCREENSHOT 1 — HOME PAGE ]</b><br/><i>LIBRANOVA Volume I Hero Banner, Tagline & Navigation Header</i><br/><br/><br/><br/>", box_text_style)
+    ]]
+    sc1_table = Table(sc1_content, colWidths=[480], rowHeights=[175])
     sc1_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.white),
         ('BOX', (0,0), (-1,-1), 2, BORDER_GOLD),
@@ -270,14 +177,14 @@ def create_report():
         ('ALIGN', (0,0), (-1,-1), 'CENTER')
     ]))
     story.append(sc1_table)
-    story.append(Paragraph("<b>Screenshot 1 — React Application</b>: Demonstrating LIBRANOVA classical UI, navigation header, book cards, and live borrow form state.", caption_style))
-    story.append(Spacer(1, 15))
+    story.append(Paragraph("<b>Screenshot 1 — Frontend Screen 1 (HomePage)</b>: Classical Academia UI, Volume I banner, tagline, student details badge, and React Router navigation header.", caption_style))
+    story.append(Spacer(1, 10))
 
-    # Screenshot 2 Box — REST API / Postman
-    sc2_content = [
-        [Paragraph("<br/><br/><br/><br/><b>[ SCREENSHOT PLACEHOLDER 2 ]</b><br/><i>Express REST API Request & Response (Postman / Browser GET /api/v1/books)</i><br/><br/><br/><br/>", ParagraphStyle('BoxText2', alignment=TA_CENTER, fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor("#7a7a7a")))]
-    ]
-    sc2_table = Table(sc2_content, colWidths=[470], rowHeights=[170])
+    # SCREENSHOT 2 PLACEHOLDER — FRONTEND BOOKS PAGE
+    sc2_content = [[
+        Paragraph("<br/><br/><br/><br/><b>[ FRONTEND SCREENSHOT 2 — BOOKS COLLECTION PAGE ]</b><br/><i>Volume III Catalog, BookCards, Available Only Filter & Quick Preview Modal</i><br/><br/><br/><br/>", box_text_style)
+    ]]
+    sc2_table = Table(sc2_content, colWidths=[480], rowHeights=[175])
     sc2_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.white),
         ('BOX', (0,0), (-1,-1), 2, BORDER_GOLD),
@@ -285,17 +192,21 @@ def create_report():
         ('ALIGN', (0,0), (-1,-1), 'CENTER')
     ]))
     story.append(sc2_table)
-    story.append(Paragraph("<b>Screenshot 2 — REST API/Postman</b>: Demonstrating GET /api/v1/books response (200 OK) and requestLogger terminal logs.", caption_style))
+    story.append(Paragraph("<b>Screenshot 2 — Frontend Screen 2 (BooksPage)</b>: Catalog view rendered via API fetch, BookCards with availability status, Available Only filter, and Quick Preview modal.", caption_style))
+
     story.append(PageBreak())
 
-    # Screenshot 3 Box — MongoDB Compass / Atlas
-    story.append(Paragraph("7. Implementation Evidence (Continued)", h1_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=12, spaceBefore=2))
+    # =========================================================
+    # PAGE 3: EVIDENCE SECTION — FRONTEND SCREEN 3 & REST API SCREEN
+    # =========================================================
+    story.append(Paragraph("3. Implementation Evidence (Continued)", h1_style))
+    story.append(HRFlowable(width="100%", thickness=1, color=BORDER_GOLD, spaceAfter=10, spaceBefore=2))
 
-    sc3_content = [
-        [Paragraph("<br/><br/><br/><br/><br/><b>[ SCREENSHOT PLACEHOLDER 3 ]</b><br/><i>MongoDB Compass / Atlas Collection & Mongoose Validation Failure</i><br/><br/><br/><br/><br/>", ParagraphStyle('BoxText3', alignment=TA_CENTER, fontName='Helvetica-Bold', fontSize=12, textColor=colors.HexColor("#7a7a7a")))]
-    ]
-    sc3_table = Table(sc3_content, colWidths=[470], rowHeights=[200])
+    # SCREENSHOT 3 PLACEHOLDER — FRONTEND BORROW PAGE
+    sc3_content = [[
+        Paragraph("<br/><br/><br/><br/><b>[ FRONTEND SCREENSHOT 3 — BORROW PAGE & RECORDS ]</b><br/><i>Volume IV Requisition Form, Live Summary & Volume V Borrowing Records List</i><br/><br/><br/><br/>", box_text_style)
+    ]]
+    sc3_table = Table(sc3_content, colWidths=[480], rowHeights=[175])
     sc3_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.white),
         ('BOX', (0,0), (-1,-1), 2, BORDER_GOLD),
@@ -303,7 +214,22 @@ def create_report():
         ('ALIGN', (0,0), (-1,-1), 'CENTER')
     ]))
     story.append(sc3_table)
-    story.append(Paragraph("<b>Screenshot 3 — MongoDB Compass/Atlas</b>: Demonstrating MongoDB database connection, Mongoose model documents, and validation error responses.", caption_style))
+    story.append(Paragraph("<b>Screenshot 3 — Frontend Screen 3 (BorrowPage)</b>: Controlled input form, Live Borrowing Summary parchment card, and unified Borrowing Records list.", caption_style))
+    story.append(Spacer(1, 10))
+
+    # SCREENSHOT 4 PLACEHOLDER — REST API BOOKS SCREEN
+    sc4_content = [[
+        Paragraph("<br/><br/><br/><br/><b>[ REST API SCREENSHOT — EXPRESS GET /api/v1/books ]</b><br/><i>JSON API Response (200 OK) & Terminal Output [METHOD] [PATH] [TIMESTAMP]</i><br/><br/><br/><br/>", box_text_style)
+    ]]
+    sc4_table = Table(sc4_content, colWidths=[480], rowHeights=[175])
+    sc4_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), colors.white),
+        ('BOX', (0,0), (-1,-1), 2, BORDER_GOLD),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER')
+    ]))
+    story.append(sc4_table)
+    story.append(Paragraph("<b>Screenshot 4 — REST API Screen (Books Endpoint)</b>: Postman/Browser execution of GET /api/v1/books showing 200 OK JSON output and terminal logger logs.", caption_style))
 
     doc.build(story)
     print(f"Report generated successfully: {pdf_filename}")

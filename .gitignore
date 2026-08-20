@@ -23,3 +23,8 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+
+# Exam Reports and Guides (Ignored from GitHub push as requested)
+24dcs074_SetB_Report.pdf
+DEMO_GUIDE.md
+VIVA_CHEAT_SHEET.md
