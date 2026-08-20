@@ -83,22 +83,58 @@ const inMemoryBorrowings = [
   }
 ];
 
-// TASK 3 - In-Memory GET /api/v1/books
-app.get('/api/v1/books', (req, res) => {
-  res.status(200).json({
-    success: true,
-    count: inMemoryBooks.length,
-    data: inMemoryBooks
-  });
+// TASK 3 & 5 - GET /api/v1/books (MongoDB primary with in-memory fallback)
+app.get('/api/v1/books', async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      let dbBooks = await Book.find({}).lean();
+      if (dbBooks.length === 0) {
+        dbBooks = await Book.insertMany(inMemoryBooks);
+      }
+      const formatted = dbBooks.map((b) => ({
+        id: b._id.toString(),
+        title: b.title,
+        author: b.author,
+        category: b.category,
+        available: b.available,
+        description: b.description || 'Classical masterwork stored in LIBRANOVA MongoDB database.'
+      }));
+      return res.status(200).json({
+        success: true,
+        count: formatted.length,
+        data: formatted
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: inMemoryBooks.length,
+      data: inMemoryBooks
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-// TASK 3 & 5 - Combined GET /api/v1/borrowings (In-memory + MongoDB)
+// TASK 3 & 5 - GET /api/v1/borrowings (ONLY MongoDB when connected)
 app.get('/api/v1/borrowings', async (req, res, next) => {
   try {
-    let mongoBorrowings = [];
     if (mongoose.connection.readyState === 1) {
-      const dbDocs = await Borrowing.find({}).sort({ createdAt: -1 }).lean();
-      mongoBorrowings = dbDocs.map((doc) => ({
+      let dbDocs = await Borrowing.find({}).sort({ createdAt: -1 }).lean();
+      
+      // Auto-seed initial sample borrowing in MongoDB if collection is brand new
+      if (dbDocs.length === 0) {
+        const initialDoc = await Borrowing.create({
+          memberName: 'Heer Patel',
+          bookTitle: 'The Republic & Dialogues',
+          borrowDate: new Date('2026-08-01'),
+          returnDate: new Date('2026-08-25'),
+          status: 'borrowed'
+        });
+        dbDocs = [initialDoc.toObject()];
+      }
+
+      const formatted = dbDocs.map((doc) => ({
         id: doc._id.toString(),
         memberName: doc.memberName || 'Scholar Member',
         bookTitle: doc.bookTitle || 'Archival Masterwork',
@@ -106,27 +142,31 @@ app.get('/api/v1/borrowings', async (req, res, next) => {
         returnDate: doc.returnDate ? new Date(doc.returnDate).toISOString().split('T')[0] : 'N/A',
         status: doc.status || 'borrowed'
       }));
+
+      return res.status(200).json({
+        success: true,
+        count: formatted.length,
+        data: formatted
+      });
     }
 
-    // Format in-memory borrowings to ensure status exists
+    // In-memory fallback if MongoDB is offline
     const formattedInMemory = inMemoryBorrowings.map((b) => ({
       ...b,
       status: b.status || 'borrowed'
     }));
 
-    const combined = [...formattedInMemory, ...mongoBorrowings];
-
     res.status(200).json({
       success: true,
-      count: combined.length,
-      data: combined
+      count: formattedInMemory.length,
+      data: formattedInMemory
     });
   } catch (error) {
     next(error);
   }
 });
 
-// TASK 3 - In-Memory & MongoDB POST /api/v1/borrowings
+// TASK 3 & 5 - POST /api/v1/borrowings (Saves directly to MongoDB)
 app.post('/api/v1/borrowings', async (req, res, next) => {
   const { memberName, bookTitle, borrowDate, returnDate } = req.body;
   if (!memberName || !bookTitle || !borrowDate || !returnDate) {
@@ -136,37 +176,50 @@ app.post('/api/v1/borrowings', async (req, res, next) => {
     });
   }
 
-  const newBorrowing = {
-    id: Date.now(),
-    memberName,
-    bookTitle,
-    borrowDate,
-    returnDate
-  };
-
-  inMemoryBorrowings.push(newBorrowing);
-
-  // Also save to MongoDB Borrowings collection so MongoDB Compass displays the saved record
   try {
     if (mongoose.connection.readyState === 1) {
-      await Borrowing.create({
+      const created = await Borrowing.create({
         memberName,
         bookTitle,
         borrowDate: new Date(borrowDate),
         returnDate: new Date(returnDate),
         status: 'borrowed'
       });
-      console.log(`[MongoDB] Saved borrowing record for "${bookTitle}" by "${memberName}" to Compass`);
+      console.log(`[MongoDB] Created borrowing document in Compass for "${bookTitle}" by "${memberName}"`);
+      
+      return res.status(201).json({
+        success: true,
+        message: 'Borrowing record saved to MongoDB successfully!',
+        data: {
+          id: created._id.toString(),
+          memberName: created.memberName,
+          bookTitle: created.bookTitle,
+          borrowDate: borrowDate,
+          returnDate: returnDate,
+          status: created.status
+        }
+      });
     }
-  } catch (dbErr) {
-    console.log('[MongoDB Notice] In-memory saved. MongoDB optional save info:', dbErr.message);
-  }
 
-  res.status(201).json({
-    success: true,
-    message: 'Borrowing record created successfully in memory and MongoDB!',
-    data: newBorrowing
-  });
+    // In-memory fallback
+    const newBorrowing = {
+      id: Date.now(),
+      memberName,
+      bookTitle,
+      borrowDate,
+      returnDate,
+      status: 'borrowed'
+    };
+    inMemoryBorrowings.push(newBorrowing);
+
+    res.status(201).json({
+      success: true,
+      message: 'Borrowing record created in memory fallback',
+      data: newBorrowing
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // ==========================================
