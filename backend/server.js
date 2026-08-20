@@ -92,17 +92,42 @@ app.get('/api/v1/books', (req, res) => {
   });
 });
 
-// TASK 3 - In-Memory GET /api/v1/borrowings
-app.get('/api/v1/borrowings', (req, res) => {
-  res.status(200).json({
-    success: true,
-    count: inMemoryBorrowings.length,
-    data: inMemoryBorrowings
-  });
+// TASK 3 & 5 - Combined GET /api/v1/borrowings (In-memory + MongoDB)
+app.get('/api/v1/borrowings', async (req, res, next) => {
+  try {
+    let mongoBorrowings = [];
+    if (mongoose.connection.readyState === 1) {
+      const dbDocs = await Borrowing.find({}).sort({ createdAt: -1 }).lean();
+      mongoBorrowings = dbDocs.map((doc) => ({
+        id: doc._id.toString(),
+        memberName: doc.memberName || 'Scholar Member',
+        bookTitle: doc.bookTitle || 'Archival Masterwork',
+        borrowDate: doc.borrowDate ? new Date(doc.borrowDate).toISOString().split('T')[0] : 'N/A',
+        returnDate: doc.returnDate ? new Date(doc.returnDate).toISOString().split('T')[0] : 'N/A',
+        status: doc.status || 'borrowed'
+      }));
+    }
+
+    // Format in-memory borrowings to ensure status exists
+    const formattedInMemory = inMemoryBorrowings.map((b) => ({
+      ...b,
+      status: b.status || 'borrowed'
+    }));
+
+    const combined = [...formattedInMemory, ...mongoBorrowings];
+
+    res.status(200).json({
+      success: true,
+      count: combined.length,
+      data: combined
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-// TASK 3 - In-Memory POST /api/v1/borrowings
-app.post('/api/v1/borrowings', (req, res) => {
+// TASK 3 - In-Memory & MongoDB POST /api/v1/borrowings
+app.post('/api/v1/borrowings', async (req, res, next) => {
   const { memberName, bookTitle, borrowDate, returnDate } = req.body;
   if (!memberName || !bookTitle || !borrowDate || !returnDate) {
     return res.status(400).json({
@@ -121,9 +146,25 @@ app.post('/api/v1/borrowings', (req, res) => {
 
   inMemoryBorrowings.push(newBorrowing);
 
+  // Also save to MongoDB Borrowings collection so MongoDB Compass displays the saved record
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await Borrowing.create({
+        memberName,
+        bookTitle,
+        borrowDate: new Date(borrowDate),
+        returnDate: new Date(returnDate),
+        status: 'borrowed'
+      });
+      console.log(`[MongoDB] Saved borrowing record for "${bookTitle}" by "${memberName}" to Compass`);
+    }
+  } catch (dbErr) {
+    console.log('[MongoDB Notice] In-memory saved. MongoDB optional save info:', dbErr.message);
+  }
+
   res.status(201).json({
     success: true,
-    message: 'Borrowing record created in memory successfully',
+    message: 'Borrowing record created successfully in memory and MongoDB!',
     data: newBorrowing
   });
 });

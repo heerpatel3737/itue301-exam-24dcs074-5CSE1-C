@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 const borrowingSchema = new mongoose.Schema(
   {
+    memberName: {
+      type: String
+    },
+    bookTitle: {
+      type: String
+    },
     memberId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Member'

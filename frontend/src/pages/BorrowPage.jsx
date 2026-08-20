@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Bookmark, Send, CheckCircle, Clock, User, BookOpen, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bookmark, Send, CheckCircle, Clock, User, BookOpen, Calendar, RefreshCw, AlertTriangle, ListFilter } from 'lucide-react';
 
 const BorrowPage = () => {
   // TASK 2: Controlled inputs state using useState
@@ -13,6 +13,43 @@ const BorrowPage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
+
+  // State for BORROWING RECORDS section
+  const [records, setRecords] = useState([]);
+  const [recordsLoading, setRecordsLoading] = useState(true);
+  const [recordsError, setRecordsError] = useState(null);
+
+  // Fetch all combined borrowing records from Express API
+  const fetchBorrowings = () => {
+    setRecordsLoading(true);
+    setRecordsError(null);
+
+    fetch('http://localhost:5000/api/v1/borrowings')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((json) => {
+        if (json.success) {
+          setRecords(json.data);
+        } else {
+          throw new Error(json.error || 'Failed to fetch borrowing records');
+        }
+        setRecordsLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching borrowing records:', err);
+        setRecordsError(err.message || 'Could not connect to LIBRANOVA server');
+        setRecordsLoading(false);
+      });
+  };
+
+  // Load records on mount
+  useEffect(() => {
+    fetchBorrowings();
+  }, []);
 
   // Handle controlled input changes
   const handleChange = (e) => {
@@ -40,6 +77,8 @@ const BorrowPage = () => {
         setSubmitting(false);
         setSubmitted(true);
         setApiResponse(data);
+        // Automatically refresh borrowing records list after submission
+        fetchBorrowings();
       })
       .catch((err) => {
         console.error('Submission error:', err);
@@ -47,6 +86,39 @@ const BorrowPage = () => {
         setSubmitted(true);
         setApiResponse({ success: false, error: 'Could not connect to backend server' });
       });
+  };
+
+  // Helper for status badge rendering
+  const renderStatusBadge = (status) => {
+    const s = (status || 'borrowed').toLowerCase();
+    if (s === 'returned') {
+      return (
+        <span className="badge-available" style={{ fontSize: '0.75rem', padding: '3px 10px' }}>
+          ✓ RETURNED
+        </span>
+      );
+    }
+    if (s === 'overdue') {
+      return (
+        <span className="badge-unavailable" style={{ fontSize: '0.75rem', padding: '3px 10px' }}>
+          ⚠ OVERDUE
+        </span>
+      );
+    }
+    return (
+      <span style={{
+        background: 'rgba(212, 175, 55, 0.2)',
+        color: '#f3e2a9',
+        border: '1px solid #d4af37',
+        padding: '3px 10px',
+        borderRadius: '12px',
+        fontSize: '0.75rem',
+        fontFamily: 'var(--font-subheading)',
+        fontWeight: '600'
+      }}>
+        📖 BORROWED
+      </span>
+    );
   };
 
   return (
@@ -62,7 +134,8 @@ const BorrowPage = () => {
         <div className="ornate-divider">📜 • ✒️ • 📜</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', alignItems: 'start' }}>
+      {/* Top Grid: Controlled Form & Live Borrowing Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', alignItems: 'start', marginBottom: '45px' }}>
         
         {/* Controlled Form */}
         <div className="arch-card" style={{ padding: '30px' }}>
@@ -166,7 +239,7 @@ const BorrowPage = () => {
               {apiResponse.success ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckCircle size={20} />
-                  <span>{apiResponse.message || 'Requisition submitted successfully via POST /api/v1/borrowings'}</span>
+                  <span>{apiResponse.message || 'Requisition submitted successfully!'}</span>
                 </div>
               ) : (
                 <div>Error: {apiResponse.error}</div>
@@ -234,6 +307,123 @@ const BorrowPage = () => {
             </div>
           </div>
         </div>
+
+      </div>
+
+      {/* ==========================================================
+          NEW SECTION: UNIFIED BORROWING RECORDS LIST BELOW
+          ========================================================== */}
+      <div className="arch-card" style={{ padding: '30px' }}>
+        
+        {/* Section Header with Title & Refresh Records Button */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '15px',
+          borderBottom: '1px dashed #8c7657',
+          paddingBottom: '15px',
+          marginBottom: '20px'
+        }}>
+          <div>
+            <span className="volume-badge" style={{ marginBottom: '4px' }}>VOLUME V • REQUISITION LOG</span>
+            <h3 style={{ fontSize: '1.6rem', color: '#f7f1e3', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <ListFilter size={22} color="#d4af37" /> BORROWING RECORDS
+            </h3>
+          </div>
+
+          <button
+            onClick={fetchBorrowings}
+            className="btn-classical-outline"
+            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            disabled={recordsLoading}
+          >
+            <RefreshCw size={14} className={recordsLoading ? 'spin' : ''} /> REFRESH RECORDS
+          </button>
+        </div>
+
+        {/* Loading State */}
+        {recordsLoading && (
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <RefreshCw size={32} color="#d4af37" style={{ animation: 'spin 1.5s linear infinite', marginBottom: '12px' }} />
+            <p style={{ color: '#d4af37', fontFamily: 'var(--font-heading)' }}>Retrieving Archival Borrowing Records...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {recordsError && !recordsLoading && (
+          <div style={{ padding: '25px', textAlign: 'center', background: 'rgba(128, 0, 32, 0.3)', border: '1px solid #ef4444', borderRadius: '6px', margin: '15px 0' }}>
+            <AlertTriangle size={32} color="#ef4444" style={{ marginBottom: '8px' }} />
+            <h4 style={{ color: '#fca5a5', margin: '0 0 6px 0' }}>Failed to Fetch Records</h4>
+            <p style={{ color: '#ece2c8', fontSize: '0.95rem', marginBottom: '15px' }}>{recordsError}</p>
+            <button onClick={fetchBorrowings} className="btn-classical" style={{ padding: '6px 14px', fontSize: '0.85rem' }}>
+              <RefreshCw size={14} /> RETRY
+            </button>
+          </div>
+        )}
+
+        {/* Single Unified Records Table */}
+        {!recordsLoading && !recordsError && records.length > 0 && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              color: '#ece2c8',
+              fontFamily: 'var(--font-body)',
+              fontSize: '1rem'
+            }}>
+              <thead>
+                <tr style={{
+                  background: 'rgba(18, 9, 7, 0.9)',
+                  borderBottom: '2px solid #d4af37',
+                  textAlign: 'left'
+                }}>
+                  <th style={{ padding: '12px 15px', color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>MEMBER</th>
+                  <th style={{ padding: '12px 15px', color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>BOOK</th>
+                  <th style={{ padding: '12px 15px', color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>BORROW DATE</th>
+                  <th style={{ padding: '12px 15px', color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>RETURN DATE</th>
+                  <th style={{ padding: '12px 15px', color: '#d4af37', fontFamily: 'var(--font-heading)', fontSize: '0.85rem' }}>STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((rec, idx) => (
+                  <tr
+                    key={rec.id || idx}
+                    style={{
+                      borderBottom: '1px solid rgba(140, 118, 87, 0.2)',
+                      background: idx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
+                      transition: 'background 0.2s ease'
+                    }}
+                  >
+                    <td style={{ padding: '14px 15px', fontWeight: '600', color: '#f7f1e3' }}>
+                      {rec.memberName || 'Scholar Member'}
+                    </td>
+                    <td style={{ padding: '14px 15px', color: '#d4af37', fontFamily: 'var(--font-subheading)', fontStyle: 'italic', fontSize: '1.05rem' }}>
+                      {rec.bookTitle || 'Archival Masterwork'}
+                    </td>
+                    <td style={{ padding: '14px 15px', color: '#d9cbb0' }}>
+                      {rec.borrowDate || 'N/A'}
+                    </td>
+                    <td style={{ padding: '14px 15px', color: '#d9cbb0' }}>
+                      {rec.returnDate || 'N/A'}
+                    </td>
+                    <td style={{ padding: '14px 15px' }}>
+                      {renderStatusBadge(rec.status)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Empty Records State */}
+        {!recordsLoading && !recordsError && records.length === 0 && (
+          <div style={{ padding: '30px', textAlign: 'center', color: '#d9cbb0' }}>
+            <p>No borrowing records currently found in the repository.</p>
+          </div>
+        )}
 
       </div>
 
